@@ -6,18 +6,15 @@ from torch.autograd import Function
 
 
 class GradReverse(Function):
-    def __init__(self, lambd):
-        self.lambd = lambd
-
-    def forward(self, x):
+    
+    @staticmethod
+    def forward(ctx, x, lambd):
+        ctx.lambd = lambd
         return x.view_as(x)
+    @staticmethod
+    def backward(ctx, grad_output):
+        return (grad_output * -ctx.lambd), None 
 
-    def backward(self, grad_output):
-        return (grad_output * -self.lambd)
-
-
-def grad_reverse(x, lambd=1.0):
-    return GradReverse(lambd)(x)
 
 
 def l2_norm(input):
@@ -82,7 +79,7 @@ class Predictor(nn.Module):
 
     def forward(self, x, reverse=False, eta=0.1):
         if reverse:
-            x = grad_reverse(x, eta)
+            x = GradReverse.apply(x, eta)
         x = F.normalize(x)
         x_out = self.fc(x) / self.temp
         return x_out
@@ -99,7 +96,7 @@ class Predictor_deep(nn.Module):
     def forward(self, x, reverse=False, eta=0.1):
         x = self.fc1(x)
         if reverse:
-            x = grad_reverse(x, eta)
+            x = GradReverse.apply(x, eta)
         x = F.normalize(x)
         x_out = self.fc2(x) / self.temp
         return x_out
@@ -114,7 +111,7 @@ class Discriminator(nn.Module):
 
     def forward(self, x, reverse=True, eta=1.0):
         if reverse:
-            x = grad_reverse(x, eta)
+            x = GradReverse.apply(x, eta)
         x = F.relu(self.fc1_1(x))
         x = F.relu(self.fc2_1(x))
         x_out = F.sigmoid(self.fc3_1(x))

@@ -1,22 +1,6 @@
 import torch.nn.functional as F
 import torch
 import numpy as np
-from torch.autograd import Function
-
-
-class GradReverse(Function):
-    def __init__(self, lambd):
-        self.lambd = lambd
-
-    def forward(self, x):
-        return x.view_as(x)
-
-    def backward(self, grad_output):
-        return (grad_output * -self.lambd)
-
-
-def grad_reverse(x, lambd=1.0):
-    return GradReverse(lambd)(x)
 
 
 def calc_coeff(iter_num, high=1.0, low=0.0, alpha=10.0, max_iter=10000.0):
