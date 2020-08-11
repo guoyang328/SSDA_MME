@@ -51,7 +51,7 @@ parser.add_argument('--dataset', type=str, default='multi',
                     help='the name of dataset')
 parser.add_argument('--num', type=int, default=3,
                     help='number of labeled examples in the target')
-parser.add_argument('--patience', type=int, default=5, metavar='S',
+parser.add_argument('--patience', type=int, default=10, metavar='S',
                     help='early stopping to wait for improvment '
                          'before terminating. (default: 5 (5000 iterations))')
 parser.add_argument('--early', action='store_false', default=True,
@@ -271,8 +271,8 @@ def test(loader):
     confusion_matrix = torch.zeros(num_class, num_class)
     with torch.no_grad():
         for batch_idx, data_t in enumerate(loader):
-            im_data_t.data.resize_(data_t[0].size()).copy_(data_t[0])
-            gt_labels_t.data.resize_(data_t[1].size()).copy_(data_t[1])
+            im_data_t.resize_(data_t[0].size()).copy_(data_t[0])
+            gt_labels_t.resize_(data_t[1].size()).copy_(data_t[1])
             feat = G(im_data_t)
             output1 = F1(feat)
             output_all = np.r_[output_all, output1.data.cpu().numpy()]
